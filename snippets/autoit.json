@@ -1,0 +1,193 @@
+{
+  "Function declaration": {
+    "prefix": "func",
+    "description": "Func ... EndFunc skeleton",
+    "body": [
+      "Func ${1:Name}(${2:params})",
+      "    $0",
+      "EndFunc"
+    ]
+  },
+
+  "If / Then / EndIf (block form)": {
+    "prefix": "if",
+    "description": "Multi-line If block",
+    "body": [
+      "If ${1:condition} Then",
+      "    $0",
+      "EndIf"
+    ]
+  },
+
+  "If / Else / EndIf": {
+    "prefix": "ifel",
+    "description": "If with Else branch",
+    "body": [
+      "If ${1:condition} Then",
+      "    ${2:; then-branch}",
+      "Else",
+      "    $0",
+      "EndIf"
+    ]
+  },
+
+  "If / ElseIf / Else / EndIf": {
+    "prefix": "ifei",
+    "description": "If with ElseIf and Else branches",
+    "body": [
+      "If ${1:condition1} Then",
+      "    ${2:; first-branch}",
+      "ElseIf ${3:condition2} Then",
+      "    ${4:; second-branch}",
+      "Else",
+      "    $0",
+      "EndIf"
+    ]
+  },
+
+  "For ... To ... Next": {
+    "prefix": "for",
+    "description": "Counted For loop",
+    "body": [
+      "For \\$${1:i} = ${2:1} To ${3:10}",
+      "    $0",
+      "Next"
+    ]
+  },
+
+  "For ... In ... Next": {
+    "prefix": "forin",
+    "description": "For-each over a collection",
+    "body": [
+      "For \\$${1:item} In ${2:\\$collection}",
+      "    $0",
+      "Next"
+    ]
+  },
+
+  "While ... Wend": {
+    "prefix": "while",
+    "description": "While loop with Wend terminator",
+    "body": [
+      "While ${1:condition}",
+      "    $0",
+      "Wend"
+    ]
+  },
+
+  "Do ... Until": {
+    "prefix": "do",
+    "description": "Do/Until loop (post-test)",
+    "body": [
+      "Do",
+      "    $0",
+      "Until ${1:condition}"
+    ]
+  },
+
+  "Switch / EndSwitch": {
+    "prefix": "switch",
+    "description": "Switch with two Cases and Case Else",
+    "body": [
+      "Switch ${1:\\$subject}",
+      "    Case ${2:value1}",
+      "        $0",
+      "    Case ${3:value2}",
+      "        ",
+      "    Case Else",
+      "        ",
+      "EndSwitch"
+    ]
+  },
+
+  "Select / EndSelect": {
+    "prefix": "select",
+    "description": "Select with boolean Cases and Case Else",
+    "body": [
+      "Select",
+      "    Case ${1:condition1}",
+      "        $0",
+      "    Case ${2:condition2}",
+      "        ",
+      "    Case Else",
+      "        ",
+      "EndSelect"
+    ]
+  },
+
+  "With / EndWith": {
+    "prefix": "with",
+    "description": "With block for COM object member access",
+    "body": [
+      "With ${1:\\$obj}",
+      "    .$0",
+      "EndWith"
+    ]
+  },
+
+  "Region": {
+    "prefix": "region",
+    "description": "Foldable #region / #endregion block",
+    "body": [
+      "#region ${1:name}",
+      "$0",
+      "#endregion"
+    ]
+  },
+
+  "Include (system)": {
+    "prefix": "inc",
+    "description": "#include <SystemHeader.au3>",
+    "body": [
+      "#include <${1:Header}.au3>"
+    ]
+  },
+
+  "Include (local)": {
+    "prefix": "incloc",
+    "description": "#include \"local-file.au3\"",
+    "body": [
+      "#include \"${1:helpers}.au3\""
+    ]
+  },
+
+  "MsgBox": {
+    "prefix": "msg",
+    "description": "Standard MsgBox call",
+    "body": [
+      "MsgBox(${1:\\$MB_OK}, \"${2:title}\", \"${3:text}\")$0"
+    ]
+  },
+
+  "ConsoleWrite": {
+    "prefix": "cw",
+    "description": "ConsoleWrite with trailing newline",
+    "body": [
+      "ConsoleWrite(\"${1:text}\" & @CRLF)$0"
+    ]
+  },
+
+  "ConsoleWrite variable": {
+    "prefix": "cwv",
+    "description": "ConsoleWrite a labelled variable",
+    "body": [
+      "ConsoleWrite(\"${1:label} = \" & ${2:\\$value} & @CRLF)$0"
+    ]
+  },
+
+  "AutoItSetOption": {
+    "prefix": "opt",
+    "description": "Set an AutoIt runtime option",
+    "body": [
+      "AutoItSetOption(\"${1:OptionName}\", ${2:value})$0"
+    ]
+  },
+
+  "HotKeySet": {
+    "prefix": "hk",
+    "description": "Register a hot-key handler",
+    "body": [
+      "HotKeySet(\"${1:{ESC}}\", \"${2:HandlerName}\")$0"
+    ]
+  }
+}

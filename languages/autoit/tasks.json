@@ -1,0 +1,157 @@
+// Language-scoped tasks for AutoIt v3. Auto-discovered by Zed because
+// this file lives at `languages/autoit/tasks.json` — no entry in
+// extension.toml needed.
+//
+// ─── AutoIt install-dir discovery ────────────────────────────────────
+// The AutoIt install path is resolved at task-run time from the Windows
+// registry, so this file ships with no user-visible hardcoded path.
+// Lookup chain, in order:
+//   1. HKLM\SOFTWARE\WOW6432Node\AutoIt v3\AutoIt  ← 64-bit Windows (~all users)
+//   2. HKLM\SOFTWARE\AutoIt v3\AutoIt              ← 32-bit Windows  (rare)
+//   3. C:\Program Files (x86)\AutoIt3              ← hardcoded final fallback
+// The official AutoIt installer writes key 1 (or key 2 on 32-bit
+// Windows); fallback 3 only matters for portable/unzipped setups, and
+// those users can still override via workspace/user tasks.json (see
+// %APPDATA%\Zed\tasks.json or .zed\tasks.json).
+//
+// PowerShell expression shape (same pattern in every task):
+//   (([string]((Get-ItemProperty <key1> -EA 0).InstallDir),
+//     [string]((Get-ItemProperty <key2> -EA 0).InstallDir),
+//     <default> -ne '')[0]
+// Casting to [string] turns a $null .InstallDir (missing key) into "".
+// Comma builds the array; `-ne ''` filters non-empty entries; [0] picks
+// the first. Crucially this expression uses NO PowerShell variables
+// ($_, $null, $dir, …), so Zed's task variable resolver leaves it
+// alone — only the `$ZED_FILE` / `$ZED_DIRNAME` substitutions fire.
+//
+// ─── Historical: Windows-PowerShell quoting saga (v0.0.4–v0.0.8) ────
+//   Zed's task runner on Windows wraps tasks in `powershell -Command`
+//   with `command + args...` joined raw (no per-arg quoting). Paths
+//   containing spaces and parens (`C:\Program Files (x86)\…`) break
+//   that join in subtle ways — see zed-industries/zed#12575 and #11208.
+//     v0.0.4: command = exe path           → PowerShell parses (x86) as a sub-expression.
+//     v0.0.5: cmd.exe shell + exe path     → cmd /C strips outer quotes around the parens.
+//     v0.0.6: 8.3 short path               → works, but ugly and 8dot3name-dependent.
+//     v0.0.7: command = `&`, exe as arg    → Zed's raw join drops the quotes.
+//     v0.0.8: `&` + embedded double quotes → survives the raw join.
+//   This file (≥ v0.1.0) supersedes all that with the registry-lookup
+//   expression above — no path string passes through Zed's arg joiner.
+//   Phase 7's LSP server will go through Rust's std::process::Command,
+//   skipping the shell entirely.
+[
+  {
+    "label": "AutoIt: Run current file",
+    "command": "&",
+    "args": [
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\AutoIt3.exe')",
+      "\"$ZED_FILE\""
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  },
+  {
+    "label": "AutoIt: Check current file (Au3Check)",
+    "command": "&",
+    "args": [
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\Au3Check.exe')",
+      "\"$ZED_FILE\""
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "always"
+  },
+  {
+    "label": "AutoIt: Compile current file to .exe (Aut2Exe)",
+    "command": "&",
+    "args": [
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\Aut2exe\\Aut2exe.exe')",
+      "/in",
+      "\"$ZED_FILE\""
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  },
+  {
+    // Launches AutoIt3Wrapper (the SciTE-bundled compile wrapper) with its
+    // GUI options dialog — set icon, version info, console mode, etc., then
+    // produce the .exe. AutoIt3Wrapper is itself an AutoIt script that
+    // shells out to Aut2Exe, so the invocation goes through AutoIt3.exe:
+    //   AutoIt3.exe AutoIt3Wrapper.au3 /ShowGui /in <user-script>
+    // The install-dir lookup appears twice — once for AutoIt3.exe, once
+    // for AutoIt3Wrapper.au3. They could share a variable in pure
+    // PowerShell but `$dir` would collide with Zed's substitution.
+    "label": "AutoIt: Compile with Options (AutoIt3Wrapper GUI)",
+    "command": "&",
+    "args": [
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\AutoIt3.exe')",
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\SciTE\\AutoIt3Wrapper\\AutoIt3Wrapper.au3')",
+      "/ShowGui",
+      "/in",
+      "\"$ZED_FILE\""
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  },
+  {
+    // Standalone GUI tool — the window-info inspector bundled with
+    // AutoIt3. Takes no script argument; just launches the .exe.
+    "label": "AutoIt: Launch Au3Info",
+    "command": "&",
+    "args": [
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\Au3Info.exe')"
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "always"
+  },
+  {
+    // Standalone GUI tool — the Koda form designer bundled with SciTE4AutoIt3.
+    // Drag-and-drop GUI builder that emits AutoIt GUI code. Takes no script
+    // argument; just launches the .exe.
+    "label": "AutoIt: Launch Koda Form Designer",
+    "command": "&",
+    "args": [
+      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\SciTE\\Koda\\FD.exe')"
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "always"
+  },
+  {
+    // SciTE-equivalent of Ctrl+Break: terminate AutoIt3.exe processes that
+    // were launched with the current buffer's file path on their command
+    // line. Zed has no built-in PID tracking for tasks (and on Windows,
+    // killing the powershell.exe wrapper would orphan the AutoIt3.exe
+    // child), so we identify by `Win32_Process.CommandLine` instead.
+    //
+    // Expression — no double-quotes (would not survive Zed's raw arg
+    // join) and no PowerShell variables (would collide with Zed's $VAR
+    // substitution). Two `Where-Object -Property` clauses replace what
+    // would otherwise be a `-Filter "Name='AutoIt3.exe'"` WQL clause.
+    // `-EA 0` makes the no-match case silent; `-PassThru` echoes the
+    // killed process objects to the terminal so the user gets feedback.
+    "label": "AutoIt: Kill running script",
+    "command": "Stop-Process",
+    "args": [
+      "-Id",
+      "((Get-CimInstance Win32_Process | Where-Object -Property Name -EQ 'AutoIt3.exe' | Where-Object -Property CommandLine -Like '*$ZED_FILE*').ProcessId)",
+      "-Force",
+      "-EA",
+      "0",
+      "-PassThru"
+    ],
+    "cwd": "$ZED_DIRNAME",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": true,
+    "reveal": "always"
+  }
+]

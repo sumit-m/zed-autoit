@@ -1,0 +1,27 @@
+name = "AutoIt"
+grammar = "autoit"
+path_suffixes = ["au3", "a3x"]
+line_comments = ["; "]
+block_comment = ["#cs", "#ce"]
+autoclose_before = ";:.,=}])>"
+brackets = [
+    { start = "(", end = ")", close = true, newline = true },
+    { start = "[", end = "]", close = true, newline = true },
+    { start = "\"", end = "\"", close = true, newline = false, not_in = ["string", "comment"] },
+    { start = "'", end = "'", close = true, newline = false, not_in = ["string", "comment"] },
+]
+
+# Per-scope overrides: scope names come from overrides.scm.
+# Word-based completion and LSP completion are turned off inside strings
+# and comments. This suppresses fuzzy-matching against other words in the
+# buffer and any future LSP completions there.
+#
+# Note: bundled snippets are NOT suppressed by these overrides — Zed's
+# snippet completion source doesn't currently honor the per-scope
+# override path. Tracked as a known limitation; revisit when Zed wires
+# snippet completion through the override resolver.
+[overrides.string]
+completions = { words = false, lsp = false }
+
+[overrides.comment]
+completions = { words = false, lsp = false }

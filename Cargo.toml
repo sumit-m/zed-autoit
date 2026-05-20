@@ -1,0 +1,15 @@
+[package]
+name = "zed_autoit"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# Zed extensions compile to WebAssembly. The .wasm output is loaded by
+# Zed at runtime; `language_server_command` is invoked when Zed wants to
+# spawn the LSP for a .au3 file.
+[lib]
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+zed_extension_api = "0.7"

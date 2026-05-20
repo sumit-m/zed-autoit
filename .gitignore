@@ -1,0 +1,36 @@
+# Rust/Wasm build artifacts (only relevant once an LSP wrapper is added)
+target/
+*.wasm
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Claude Code per-user state
+.claude/
+
+# NOTE: the tree-sitter-autoit grammar lives in a sibling directory
+# (../tree-sitter-autoit) on the host machine, not inside this repo.
+# See BOOTSTRAP.md for the layout under claude/.
+
+# Zed's local clone of the grammar (created on `zed: install dev extension`).
+# Not a source artifact — regenerated on every install from the file:/// URL
+# in extension.toml.
+grammars/
+
+# Outputs from scripts/test-corpus.ps1 (Phase 6 bulk-parse harness). The
+# failure list and run log are transient and machine-specific (they
+# reference paths under C:\Program Files (x86)\AutoIt3\Examples).
+corpus-failures.txt
+corpus-run.log
+
+# Internal project-memory and planning docs — local-only, never published.
+# Public-quality docs live in README.md. The history archive captures the
+# pre-public-release commit log of all three repos.
+CLAUDE.md
+PLAN.md
+BOOTSTRAP.md
+PHASE0-FINDINGS.md
+PHASE2-PLAN.md
+PHASE7-REFINEMENTS.md
+INTERNAL-HISTORY.md
