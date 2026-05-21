@@ -1,6 +1,6 @@
 id = "autoit"
 name = "AutoIt"
-version = "0.1.0"
+version = "0.3.0"
 schema_version = 1
 authors = ["Sumit Madan"]
 description = "AutoIt v3 (.au3) language support for Zed"
