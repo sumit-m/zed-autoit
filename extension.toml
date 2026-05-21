@@ -15,7 +15,7 @@ snippets = ["./snippets/autoit.json"]
 # up grammar updates, then reinstall the dev extension in Zed.
 [grammars.autoit]
 repository = "https://github.com/sumit-m/tree-sitter-autoit"
-commit = "d558781f8f067346d128797cb08f84fdcbbaca34"
+commit = "ec482218e506c9d9d5014d69ee00a87544c291e8"
 
 # LSP server: built from the sibling `autoit-lsp` repo. The extension's
 # Rust code (src/lib.rs) tells Zed where to find the binary.
