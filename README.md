@@ -60,13 +60,13 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 
 | Task | What it does |
 |---|---|
-| **AutoIt: Run current file** | `AutoIt3.exe $ZED_FILE` — runs the script. |
-| **AutoIt: Check current file (Au3Check)** | Lints the file with the official `Au3Check.exe` — preview of what the LSP shows as you edit. |
-| **AutoIt: Compile current file to .exe (Aut2Exe)** | Direct compile to a standalone Windows binary with defaults. |
-| **AutoIt: Compile with Options (AutoIt3Wrapper GUI)** | Launches the SciTE-bundled `AutoIt3Wrapper.au3` with `/ShowGui` so you pick icon / version info / console mode before compile. |
+| **AutoIt: Run** *filename* | Runs the script, streaming `ConsoleWrite()` output to the terminal in real time. |
+| **AutoIt: Check** *filename* **(Au3Check)** | Lints the file with the official `Au3Check.exe` — preview of what the LSP shows as you edit. |
+| **AutoIt: Compile** *filename* **(Aut2Exe)** | Direct compile to a standalone Windows binary with defaults. |
+| **AutoIt: Compile** *filename* **with Options (AutoIt3Wrapper GUI)** | Launches the SciTE-bundled `AutoIt3Wrapper.au3` with `/ShowGui` so you pick icon / version info / console mode before compile. |
 | **AutoIt: Launch Au3Info** | The window-info inspector GUI. |
 | **AutoIt: Launch Koda Form Designer** | The drag-and-drop GUI builder bundled with SciTE4AutoIt3. |
-| **AutoIt: Kill running script** | SciTE-equivalent of Ctrl+Break — terminates the `AutoIt3.exe` process running the current file. |
+| **AutoIt: Kill** *filename* | SciTE-equivalent of Ctrl+Break — terminates the `AutoIt3.exe` process running the current file. |
 
 ## Strengths
 
@@ -93,7 +93,6 @@ How this extension stacks up on the surfaces where extensions are usually compar
 ### Permanent constraints
 
 - **Diagnostics + tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, snippets, and the upcoming completion / go-to-def / find-references / cross-file features — works on Linux and macOS too.
-- **Task rerun uses the file from the first run, not the current file** (Zed limitation — [zed-industries/zed#57380](https://github.com/zed-industries/zed/pull/57380) is an open PR that fixes this upstream). Until that lands, use **task: spawn** (`ctrl-shift-p`) to pick a task for whichever file is currently active rather than relying on task rerun.
 - **`#region` doesn't fold** (Zed limitation — [zed-industries/zed#22703](https://github.com/zed-industries/zed/issues/22703) upstream). The grammar correctly identifies region blocks; Zed's folding mechanism doesn't currently support non-leaf-token multi-node folds.
 - **Outline panel is flat** (Zed limitation — the LSP emits a proper hierarchy with parameters as children of functions and contents nested under regions, but Zed's outline panel renders flat with indentation instead of expand/collapse).
 - **Snippets fire inside strings/comments** (Zed limitation in the snippet completion source — the extension's `overrides.scm` correctly identifies string/comment scopes, but Zed's snippet provider doesn't currently honor the per-scope override).

@@ -59,7 +59,7 @@
     //
     // Same anti-substitution discipline as the other tasks: no PowerShell
     // $variables in the expression, only $ZED_FILE goes through Zed.
-    "label": "AutoIt: Run current file",
+    "label": "AutoIt: Run $ZED_FILENAME",
     "command": "&",
     "args": [
       "(([string](Get-Command 'autoit-run' -EA 0).Source,[string]((Get-ItemProperty 'HKCU:\\SOFTWARE\\zed-autoit' -EA 0).RunnerPath) -ne '')[0])",
@@ -71,7 +71,7 @@
     "reveal": "always"
   },
   {
-    "label": "AutoIt: Check current file (Au3Check)",
+    "label": "AutoIt: Check $ZED_FILENAME (Au3Check)",
     "command": "&",
     "args": [
       "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\Au3Check.exe')",
@@ -83,7 +83,7 @@
     "reveal": "always"
   },
   {
-    "label": "AutoIt: Compile current file to .exe (Aut2Exe)",
+    "label": "AutoIt: Compile $ZED_FILENAME (Aut2Exe)",
     "command": "&",
     "args": [
       "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\Aut2exe\\Aut2exe.exe')",
@@ -104,7 +104,7 @@
     // autoit-run handles AutoIt3.exe discovery internally, so only the
     // AutoIt3Wrapper.au3 path needs the registry lookup here (one lookup
     // instead of the two that appeared in earlier versions of this task).
-    "label": "AutoIt: Compile with Options (AutoIt3Wrapper GUI)",
+    "label": "AutoIt: Compile $ZED_FILENAME with Options (AutoIt3Wrapper GUI)",
     "command": "&",
     "args": [
       "(([string](Get-Command 'autoit-run' -EA 0).Source,[string]((Get-ItemProperty 'HKCU:\\SOFTWARE\\zed-autoit' -EA 0).RunnerPath) -ne '')[0])",
@@ -158,7 +158,7 @@
     // would otherwise be a `-Filter "Name='AutoIt3.exe'"` WQL clause.
     // `-EA 0` makes the no-match case silent; `-PassThru` echoes the
     // killed process objects to the terminal so the user gets feedback.
-    "label": "AutoIt: Kill running script",
+    "label": "AutoIt: Kill $ZED_FILENAME",
     "command": "Stop-Process",
     "args": [
       "-Id",
