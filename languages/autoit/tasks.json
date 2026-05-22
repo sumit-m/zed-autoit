@@ -40,10 +40,29 @@
 //   skipping the shell entirely.
 [
   {
+    // AutoIt3.exe is a Windows GUI-subsystem executable. ConsoleWrite() only
+    // writes to stdout when it has a real *pipe* handle — not a console handle.
+    // Zed's task runner invokes programs via PowerShell, which provides a
+    // console handle, so ConsoleWrite() output is silently discarded.
+    //
+    // autoit-run.exe is a thin console-subsystem wrapper (shipped alongside
+    // autoit-lsp.exe in the same extension cache directory). It spawns
+    // AutoIt3.exe with a real pipe, then streams each output line to its own
+    // stdout as it arrives — giving the same live ConsoleWrite() experience as
+    // SciTE. Long-running scripts show output in real time, not all-at-once.
+    //
+    // Discovery — two-level, no hardcoded path:
+    //   1. Get-Command 'autoit-run'  → PATH lookup (dev / power users)
+    //   2. HKCU\SOFTWARE\zed-autoit\RunnerPath  → written by autoit-lsp.exe
+    //      at startup when it finds autoit-run.exe in its own directory
+    //      (i.e. after the Zed extension downloads and extracts the zip).
+    //
+    // Same anti-substitution discipline as the other tasks: no PowerShell
+    // $variables in the expression, only $ZED_FILE goes through Zed.
     "label": "AutoIt: Run current file",
     "command": "&",
     "args": [
-      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\AutoIt3.exe')",
+      "(([string](Get-Command 'autoit-run' -EA 0).Source,[string]((Get-ItemProperty 'HKCU:\\SOFTWARE\\zed-autoit' -EA 0).RunnerPath) -ne '')[0])",
       "\"$ZED_FILE\""
     ],
     "cwd": "$ZED_DIRNAME",
@@ -81,14 +100,14 @@
     // GUI options dialog — set icon, version info, console mode, etc., then
     // produce the .exe. AutoIt3Wrapper is itself an AutoIt script that
     // shells out to Aut2Exe, so the invocation goes through AutoIt3.exe:
-    //   AutoIt3.exe AutoIt3Wrapper.au3 /ShowGui /in <user-script>
-    // The install-dir lookup appears twice — once for AutoIt3.exe, once
-    // for AutoIt3Wrapper.au3. They could share a variable in pure
-    // PowerShell but `$dir` would collide with Zed's substitution.
+    //   autoit-run AutoIt3Wrapper.au3 /ShowGui /in <user-script>
+    // autoit-run handles AutoIt3.exe discovery internally, so only the
+    // AutoIt3Wrapper.au3 path needs the registry lookup here (one lookup
+    // instead of the two that appeared in earlier versions of this task).
     "label": "AutoIt: Compile with Options (AutoIt3Wrapper GUI)",
     "command": "&",
     "args": [
-      "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\AutoIt3.exe')",
+      "(([string](Get-Command 'autoit-run' -EA 0).Source,[string]((Get-ItemProperty 'HKCU:\\SOFTWARE\\zed-autoit' -EA 0).RunnerPath) -ne '')[0])",
       "((([string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\WOW6432Node\\AutoIt v3\\AutoIt' -EA 0).InstallDir), [string]((Get-ItemProperty 'HKLM:\\SOFTWARE\\AutoIt v3\\AutoIt' -EA 0).InstallDir), 'C:\\Program Files (x86)\\AutoIt3' -ne ''))[0] + '\\SciTE\\AutoIt3Wrapper\\AutoIt3Wrapper.au3')",
       "/ShowGui",
       "/in",

@@ -1,10 +1,10 @@
 <h1 align="center">AutoIt for Zed</h1>
 
-<p align="center">First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a> — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, snippets, and one-keystroke task runners for the AutoIt toolchain.</p>
-
 <p align="center">
   <img src="./robot.png" alt="Pixel-art weathered robot holding a magnifying glass and a club — mascot for the AutoIt for Zed extension" width="500">
 </p>
+
+<p align="center">First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a> — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, snippets, and one-keystroke task runners for the AutoIt toolchain.</p>
 
 ## Features
 
@@ -93,6 +93,7 @@ How this extension stacks up on the surfaces where extensions are usually compar
 ### Permanent constraints
 
 - **Diagnostics + tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, snippets, and the upcoming completion / go-to-def / find-references / cross-file features — works on Linux and macOS too.
+- **Task rerun uses the file from the first run, not the current file** (Zed limitation — [zed-industries/zed#57380](https://github.com/zed-industries/zed/pull/57380) is an open PR that fixes this upstream). Until that lands, use **task: spawn** (`ctrl-shift-p`) to pick a task for whichever file is currently active rather than relying on task rerun.
 - **`#region` doesn't fold** (Zed limitation — [zed-industries/zed#22703](https://github.com/zed-industries/zed/issues/22703) upstream). The grammar correctly identifies region blocks; Zed's folding mechanism doesn't currently support non-leaf-token multi-node folds.
 - **Outline panel is flat** (Zed limitation — the LSP emits a proper hierarchy with parameters as children of functions and contents nested under regions, but Zed's outline panel renders flat with indentation instead of expand/collapse).
 - **Snippets fire inside strings/comments** (Zed limitation in the snippet completion source — the extension's `overrides.scm` correctly identifies string/comment scopes, but Zed's snippet provider doesn't currently honor the per-scope override).
