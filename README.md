@@ -4,13 +4,16 @@
   <img src="./robot.png" alt="Pixel-art weathered robot holding a magnifying glass and a club — mascot for the AutoIt for Zed extension" width="500">
 </p>
 
-<p align="center">First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a> — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, snippets, and one-keystroke task runners for the AutoIt toolchain.</p>
+First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a> — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
 
 ## Features
 
 - **Syntax highlighting** via a from-scratch [tree-sitter grammar](https://github.com/sumit-m/tree-sitter-autoit) — 182 corpus tests, 99.96% pass rate against AutoIt's bundled Examples directory (2,662 files).
 - **Live diagnostics** via the [autoit-lsp](https://github.com/sumit-m/autoit-lsp) language server, which wraps AutoIt's official `Au3Check.exe`. Edits surface red squiggles ~400ms after you stop typing (configurable) without needing to save.
-- **Hover docs** for **3,542 functions** (core builtins + UDF library) scraped from the official AutoIt help — signature, summary, parameter list, return value, and a footer link to the canonical docs page.
+- **Hover docs** for **3,542 functions** (core builtins + UDF library) from the official AutoIt help — signature, summary, parameter list, return value, and a footer link to the canonical docs page.
+- **Go-to-definition** — jump to where any function, variable, or constant is declared. Works within the current file and across `#include`d files.
+- **Find-references** — locate all usages of the symbol under the cursor, scope-aware (local variables only match within their function).
+- **Completion** — context-aware popup for variables (`$`), macros (`@`), functions (built-in and user-defined), and symbols from included files. Also completes file paths inside `#include` directives.
 - **Document symbols / outline** — functions, `Global`/`Const`/`Enum` declarations, `#Region` blocks.
 - **Brackets, indentation, outline navigation** — the usual editor affordances.
 - **19 bundled snippets** for `Func`, `If`/`ElseIf`/`Else`, `For`, `While`, `Switch`, `Region`, `MsgBox`, `ConsoleWrite`, hot-keys, etc.
@@ -19,12 +22,12 @@
 ## Requirements
 
 - **Zed** 0.180 or later (uses `schema_version = 1`).
-- **Any OS** — the extension and language server build and run on Windows, Linux, and macOS. Syntax highlighting, outline, hover docs, snippets, and the upcoming completion / go-to-def / find-references features work everywhere.
+- **Any OS** — the extension and language server build and run on Windows, Linux, and macOS. Syntax highlighting, outline, hover docs, go-to-definition, find-references, completion, and snippets work everywhere.
 - **Windows + AutoIt v3 installed** if you want live diagnostics or the bundled tasks. Both rely on AutoIt's Windows-only binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`). AutoIt install can be:
   - **Default installer** (`C:\Program Files (x86)\AutoIt3\`) — fully zero-config.
   - **Custom installer location** — fully zero-config, the registry tells us where.
   - **Portable / unzipped** at a non-default path — set `au3checkPath` in your Zed settings (see [Configuration](#configuration)).
-- On Linux/macOS the LSP starts cleanly and serves hover/outline; diagnostics are silently disabled. Task definitions are still installed but won't run since they invoke `*.exe` binaries.
+- On Linux/macOS the LSP starts cleanly and serves hover, outline, go-to-definition, find-references, and completion; diagnostics are silently disabled. Task definitions are still installed but won't run since they invoke `*.exe` binaries.
 
 ## Installation
 
@@ -68,40 +71,25 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 | **AutoIt: Launch Koda Form Designer** | The drag-and-drop GUI builder bundled with SciTE4AutoIt3. |
 | **AutoIt: Kill** *filename* | SciTE-equivalent of Ctrl+Break — terminates the `AutoIt3.exe` process running the current file. |
 
-## Strengths
-
-How this extension stacks up on the surfaces where extensions are usually compared:
-
-| Surface | Our state |
-|---|---|
-| **Grammar** | Written from scratch, **182 corpus tests**, **99.96% pass rate** against 2,662 real-world `.au3` files |
-| **LSP polish** | Debounced edit-time diagnostics, content-hash caching, temp-file staging, multi-char squiggle range with 3-tier fallback, case-insensitive identifier lookup, configurable settings |
-| **Builtin metadata** | **3,542 functions** with full signatures + parameters + return values + per-function docs links, scraped from authoritative source |
-| **Test coverage** | 78 LSP unit tests + 182 grammar tests + 2,662-file corpus harness |
-| **Tasks** | 7 tasks with zero-config install discovery via Windows registry |
-| **Snippets** | 19 snippets bundled in the extension |
-
 ## Limitations
 
-### Gaps (planned)
+### Known gaps
 
-- **No go-to-definition** (yet — Sprint 2)
-- **No find-references** (yet — Sprint 2)
-- **No completion** (yet — Sprint 3)
-- **No cross-file resolution** (yet — Sprint 4, v0.4)
+- **Find-references is single-file only.** References in other `#include`d files are not yet returned — only usages within the currently-open document. Cross-file find-references is planned for a future release.
+- **Hover shows nothing for user-defined functions.** The hover catalog covers the 3,542 documented AutoIt builtins and UDF library functions. Hover for symbols defined in your own code (with doc-comment extraction) is planned.
 
 ### Permanent constraints
 
-- **Diagnostics + tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, snippets, and the upcoming completion / go-to-def / find-references / cross-file features — works on Linux and macOS too.
+- **Diagnostics + tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, go-to-definition, find-references, completion, and snippets — works on Linux and macOS too.
 - **`#region` doesn't fold** (Zed limitation — [zed-industries/zed#22703](https://github.com/zed-industries/zed/issues/22703) upstream). The grammar correctly identifies region blocks; Zed's folding mechanism doesn't currently support non-leaf-token multi-node folds.
-- **Outline panel is flat** (Zed limitation — the LSP emits a proper hierarchy with parameters as children of functions and contents nested under regions, but Zed's outline panel renders flat with indentation instead of expand/collapse).
-- **Snippets fire inside strings/comments** (Zed limitation in the snippet completion source — the extension's `overrides.scm` correctly identifies string/comment scopes, but Zed's snippet provider doesn't currently honor the per-scope override).
+- **Outline panel is flat** (Zed limitation — the LSP emits a proper hierarchy with parameters as children of functions and contents nested under regions, but Zed's outline panel renders flat with indentation instead of expand/collapse — tracked at [zed-industries/zed#23095](https://github.com/zed-industries/zed/issues/23095)).
+- **Snippets fire inside strings/comments** (Zed limitation — the extension's `overrides.scm` correctly identifies string/comment scopes and suppresses word/LSP completions there, but Zed's snippet provider doesn't currently honor the per-scope override — tracked at [zed-industries/zed#21578](https://github.com/zed-industries/zed/pull/21578)). The existing override blocks will start working automatically once that is fixed upstream.
 
 ## Troubleshooting
 
 **Diagnostics don't appear.** Check that AutoIt is installed and `Au3Check.exe` exists. If you have a portable / non-installer AutoIt, set `au3checkPath` (see [Configuration](#configuration)). The server logs `Au3Check.exe not found in registry, default path, or initializationOptions.au3checkPath — diagnostics disabled` to stderr if discovery fails.
 
-**Hover shows nothing on a function I know is a builtin.** The hover catalog covers documented builtins and the UDF library shipped with AutoIt. User-defined functions don't have hover yet — that's planned for Sprint 4 (cross-file). Macros (`@CRLF`, etc.) and variables (`$var`) also don't show hover yet.
+**Hover shows nothing on a function I know is a builtin.** The hover catalog covers documented builtins and the UDF library shipped with AutoIt. User-defined functions and macros (`@CRLF`, etc.) don't have hover yet.
 
 **Tasks fail with `'x86' is not recognized` or similar PowerShell errors.** Make sure Zed's default shell is PowerShell, not `cmd.exe` or bash. The tasks use PowerShell's `&` call operator and the registry-lookup pattern; running them through a different shell needs a workspace `tasks.json` override with your preferred invocation.
 
