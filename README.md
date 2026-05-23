@@ -4,7 +4,7 @@
   <img src="./robot.png" alt="Pixel-art weathered robot holding a magnifying glass and a club — mascot for the AutoIt for Zed extension" width="500">
 </p>
 
-First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a> — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
+**First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a>** — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
 
 ## Features
 
@@ -73,11 +73,6 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 
 ## Limitations
 
-### Known gaps
-
-- **Find-references is single-file only.** References in other `#include`d files are not yet returned — only usages within the currently-open document. Cross-file find-references is planned for a future release.
-- **Hover shows nothing for user-defined functions.** The hover catalog covers the 3,542 documented AutoIt builtins and UDF library functions. Hover for symbols defined in your own code (with doc-comment extraction) is planned.
-
 ### Permanent constraints
 
 - **Diagnostics + tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, go-to-definition, find-references, completion, and snippets — works on Linux and macOS too.
@@ -89,7 +84,7 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 
 **Diagnostics don't appear.** Check that AutoIt is installed and `Au3Check.exe` exists. If you have a portable / non-installer AutoIt, set `au3checkPath` (see [Configuration](#configuration)). The server logs `Au3Check.exe not found in registry, default path, or initializationOptions.au3checkPath — diagnostics disabled` to stderr if discovery fails.
 
-**Hover shows nothing on a function I know is a builtin.** The hover catalog covers documented builtins and the UDF library shipped with AutoIt. User-defined functions and macros (`@CRLF`, etc.) don't have hover yet.
+**Hover shows nothing on a function I defined myself.** If you're hovering a call that's defined in the same file or an `#include`d file, confirm the definition uses the standard `Func Name(...)` syntax and that the file has been saved (the index is built from the on-disk content). The built-in catalog covers ~3,542 documented AutoIt builtins and UDF library functions; user-defined functions show a signature popup once indexed. Macros (`@CRLF`, `@ScriptDir`, etc.) don't have hover — they're covered by completion detail strings instead.
 
 **Tasks fail with `'x86' is not recognized` or similar PowerShell errors.** Make sure Zed's default shell is PowerShell, not `cmd.exe` or bash. The tasks use PowerShell's `&` call operator and the registry-lookup pattern; running them through a different shell needs a workspace `tasks.json` override with your preferred invocation.
 
