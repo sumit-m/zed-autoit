@@ -4,7 +4,7 @@
   <img src="./robot.png" alt="Pixel-art weathered robot holding a magnifying glass and a club — mascot for the AutoIt for Zed extension" width="500">
 </p>
 
-**First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a>** — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
+**First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a>** — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, signature help, inlay hints, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
 
 ## Features
 
@@ -14,6 +14,8 @@
 - **Go-to-definition** — jump to where any function, variable, or constant is declared. Works within the current file and across `#include`d files.
 - **Find-references** — locate all usages of the symbol under the cursor, scope-aware (local variables only match within their function).
 - **Completion** — context-aware popup for variables (`$`), macros (`@`), functions (built-in and user-defined), and symbols from included files. Also completes file paths inside `#include` directives.
+- **Signature help** — parameter popup as you type inside a function call, with the active parameter highlighted. Covers all ~3,542 built-in and UDF library functions plus user-defined functions with their doc-comments. Requires two Zed settings to enable — see [Signature help and inlay hints](#signature-help-and-inlay-hints) below.
+- **Inlay hints** — always-visible parameter name labels on existing call sites (e.g. `flag: 0  title: "Hi"  text: "Hello"`). Works out of the box if inlay hints are enabled in Zed.
 - **Document symbols / outline** — functions, `Global`/`Const`/`Enum` declarations, `#Region` blocks.
 - **Brackets, indentation, outline navigation** — the usual editor affordances.
 - **19 bundled snippets** for `Func`, `If`/`ElseIf`/`Else`, `For`, `While`, `Switch`, `Region`, `MsgBox`, `ConsoleWrite`, hot-keys, etc.
@@ -56,6 +58,31 @@ All settings live under `lsp.autoit-lsp.settings` in your `settings.json` (`%APP
 |---|---|---|
 | `au3checkPath` | (registry discovery) | Absolute path to `Au3Check.exe`. Needed only for portable / unzipped AutoIt installs at non-default locations. If set to a non-existent file, the server logs a warning and falls back to registry discovery — so a stale setting doesn't break the LSP after you install AutoIt normally. |
 | `debounceMs` | `400` | Milliseconds to wait after the last keystroke before re-linting. Clamped to `[50, 5000]`. The first edit after open or save lints immediately regardless. |
+
+### Signature help and inlay hints
+
+These features are served by the language server but controlled by Zed's own editor settings (not under `lsp.autoit-lsp`).
+
+**Signature help** is disabled by default in Zed. Enable it by adding these two lines to your `settings.json`:
+
+```json
+{
+  "auto_signature_help": true,
+  "show_signature_help_after_edits": true
+}
+```
+
+With these enabled, the parameter popup appears automatically when your cursor enters a function call's argument list and stays open as you type. You can also trigger it manually at any time with **Ctrl+I** (Windows/Linux) or **Cmd+I** (macOS) — this works regardless of the settings above.
+
+**Inlay hints** (parameter name labels on call sites) are controlled by Zed's `inlay_hints` setting, which defaults to `enabled: true` in recent Zed releases. If you don't see them, check:
+
+```json
+{
+  "inlay_hints": {
+    "enabled": true
+  }
+}
+```
 
 ## Tasks
 
