@@ -4,7 +4,7 @@
   <img src="./robot.png" alt="Pixel-art weathered robot holding a magnifying glass and a club — mascot for the AutoIt for Zed extension" width="500">
 </p>
 
-**First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a>** — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, signature help, inlay hints, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
+**First-class editing support for <a href="https://www.autoitscript.com/site/autoit/">AutoIt v3</a> (<code>.au3</code>, <code>.a3x</code>) in the <a href="https://zed.dev">Zed editor</a>** — syntax highlighting, live diagnostics, hover docs for ~3,500 built-in and library functions, outline, go-to-definition, find-references, completion, signature help, inlay hints, code actions, code formatting, cross-file <code>#include</code> resolution, snippets, and one-keystroke task runners for the AutoIt toolchain.
 
 ## Features
 
@@ -16,6 +16,8 @@
 - **Completion** — context-aware popup for variables (`$`), macros (`@`), functions (built-in and user-defined), and symbols from included files. Also completes file paths inside `#include` directives.
 - **Signature help** — parameter popup as you type inside a function call, with the active parameter highlighted. Covers all ~3,542 built-in and UDF library functions plus user-defined functions with their doc-comments. Requires two Zed settings to enable — see [Signature help and inlay hints](#signature-help-and-inlay-hints) below.
 - **Inlay hints** — always-visible parameter name labels on existing call sites (e.g. `flag: 0  title: "Hi"  text: "Hello"`). Works out of the box if inlay hints are enabled in Zed.
+- **Code actions** — quick-fixes on diagnostic squiggles: add a missing `#include <Lib.au3>` for UDF library functions, and fix function-name casing to the canonical form.
+- **Code formatting** — reformat the current file via AutoIt3Wrapper's `/Tidy` mode (fixes indentation, normalises keyword/function casing). Windows-only; requires SciTE4AutoIt3. Trigger with the editor's **Format Document** command.
 - **Document symbols / outline** — functions, `Global`/`Const`/`Enum` declarations, `#Region` blocks.
 - **Brackets, indentation, outline navigation** — the usual editor affordances.
 - **19 bundled snippets** for `Func`, `If`/`ElseIf`/`Else`, `For`, `While`, `Switch`, `Region`, `MsgBox`, `ConsoleWrite`, hot-keys, etc.
@@ -25,11 +27,12 @@
 
 - **Zed** 0.180 or later (uses `schema_version = 1`).
 - **Any OS** — the extension and language server build and run on Windows, Linux, and macOS. Syntax highlighting, outline, hover docs, go-to-definition, find-references, completion, and snippets work everywhere.
-- **Windows + AutoIt v3 installed** if you want live diagnostics or the bundled tasks. Both rely on AutoIt's Windows-only binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`). AutoIt install can be:
+- **Windows + AutoIt v3 installed** if you want live diagnostics, code formatting, or the bundled tasks. These rely on AutoIt's Windows-only binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`). AutoIt install can be:
   - **Default installer** (`C:\Program Files (x86)\AutoIt3\`) — fully zero-config.
   - **Custom installer location** — fully zero-config, the registry tells us where.
   - **Portable / unzipped** at a non-default path — set `au3checkPath` in your Zed settings (see [Configuration](#configuration)).
-- On Linux/macOS the LSP starts cleanly and serves hover, outline, go-to-definition, find-references, and completion; diagnostics are silently disabled. Task definitions are still installed but won't run since they invoke `*.exe` binaries.
+- **SciTE4AutoIt3** (the full SciTE bundle from autoitscript.com) if you want code formatting. It provides `AutoIt3Wrapper.au3` and `Tidy.exe`, which the formatter invokes. Standard SciTE4AutoIt3 installs to `C:\Program Files (x86)\AutoIt3\SciTE\` and are discovered automatically.
+- On Linux/macOS the LSP starts cleanly and serves hover, outline, go-to-definition, find-references, and completion; diagnostics and formatting are silently disabled. Task definitions are still installed but won't run since they invoke `*.exe` binaries.
 
 ## Installation
 
@@ -84,6 +87,14 @@ With these enabled, the parameter popup appears automatically when your cursor e
 }
 ```
 
+### Code formatting
+
+Code formatting uses AutoIt3Wrapper's `/Tidy` mode to fix indentation, normalise keyword and function casing, and clean up spacing. It is automatically available when [SciTE4AutoIt3](https://www.autoitscript.com/site/autoit-script-editor/downloads/) is installed alongside AutoIt (the LSP detects it via the Windows registry). No configuration is needed.
+
+Trigger formatting with Zed's standard **Format Document** command (`alt-shift-f` on Windows/Linux, `option-shift-f` on macOS), or via the command palette: `editor: format`.
+
+The `"Format Document"` option only appears in the command palette when the LSP has detected all three required binaries (`AutoIt3.exe`, `AutoIt3Wrapper.au3`, `Tidy.exe`). If formatting does not appear, confirm that SciTE4AutoIt3 is installed.
+
 ## Tasks
 
 All tasks scope to AutoIt files only and show up in the Command Palette under **task: spawn**. AutoIt's install directory is discovered at run-time from the Windows registry, so no editing is needed for standard installs.
@@ -102,7 +113,7 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 
 ### Permanent constraints
 
-- **Diagnostics + tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, go-to-definition, find-references, completion, and snippets — works on Linux and macOS too.
+- **Diagnostics, code formatting, and tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, go-to-definition, find-references, completion, code actions, and snippets — works on Linux and macOS too.
 - **`#region` doesn't fold** (Zed limitation — [zed-industries/zed#22703](https://github.com/zed-industries/zed/issues/22703) upstream). The grammar correctly identifies region blocks; Zed's folding mechanism doesn't currently support non-leaf-token multi-node folds.
 - **Outline panel is flat** (Zed limitation — the LSP emits a proper hierarchy with parameters as children of functions and contents nested under regions, but Zed's outline panel renders flat with indentation instead of expand/collapse — tracked at [zed-industries/zed#23095](https://github.com/zed-industries/zed/issues/23095)).
 - **Snippets fire inside strings/comments** (Zed limitation — the extension's `overrides.scm` correctly identifies string/comment scopes and suppresses word/LSP completions there, but Zed's snippet provider doesn't currently honor the per-scope override — tracked at [zed-industries/zed#21578](https://github.com/zed-industries/zed/pull/21578)). The existing override blocks will start working automatically once that is fixed upstream.
@@ -116,6 +127,8 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 **Tasks fail with `'x86' is not recognized` or similar PowerShell errors.** Make sure Zed's default shell is PowerShell, not `cmd.exe` or bash. The tasks use PowerShell's `&` call operator and the registry-lookup pattern; running them through a different shell needs a workspace `tasks.json` override with your preferred invocation.
 
 **The squiggle lands on `)` instead of the function name.** Should be fixed in v0.3.0 — please [file an issue](https://github.com/sumit-m/zed-autoit/issues) with the source line and the message Au3Check produced.
+
+**"Format Document" doesn't appear / formatting does nothing.** The formatter requires [SciTE4AutoIt3](https://www.autoitscript.com/site/autoit-script-editor/downloads/) — the full SciTE bundle, not just the base AutoIt3 installer. Install it, then reload Zed (the LSP discovers the binaries at startup). If SciTE4AutoIt3 is installed at a non-default path, the LSP uses the Windows registry to locate it; a portable install at a custom path is not currently supported for formatting.
 
 ## License
 
