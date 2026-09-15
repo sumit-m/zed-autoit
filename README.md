@@ -14,7 +14,7 @@
 - **Go-to-definition** — jump to where any function, variable, or constant is declared. Works within the current file and across `#include`d files.
 - **Find-references** — locate all usages of the symbol under the cursor, scope-aware (local variables only match within their function). Project-wide: when a folder is open, references in files that `#include` the current one are found too.
 - **Document highlight** — place the cursor on a variable or function and every other occurrence in the file is passively highlighted, distinguishing reads from writes (the left-hand side of an assignment renders as a write).
-- **Call hierarchy** — incoming ("who calls this?") and outgoing ("what does this call?") trees for any function, spanning the `#include` graph and the whole project. *Computed by the language server today, but Zed has no call-hierarchy UI yet ([zed-industries/zed#14203](https://github.com/zed-industries/zed/issues/14203)) — it lights up automatically once Zed ships one.*
+- **Call hierarchy** — incoming ("who calls this?") and outgoing ("what does this call?") trees for any function, spanning the `#include` graph and the whole project. Requires Zed 1.19 or newer; open it with the `call_hierarchy: show incoming calls` action (`ctrl-k ctrl-h`, `cmd-k cmd-h` on macOS) and toggle the direction from inside the picker.
 - **Completion** — context-aware popup for variables (`$`), macros (`@`), functions (built-in and user-defined), and symbols from included files. Also completes file paths inside `#include` directives.
 - **Signature help** — parameter popup as you type inside a function call, with the active parameter highlighted. Covers all ~3,542 built-in and UDF library functions plus user-defined functions with their doc-comments. Requires two Zed settings to enable — see [Signature help and inlay hints](#signature-help-and-inlay-hints) below.
 - **Inlay hints** — always-visible parameter name labels on existing call sites (e.g. `flag: 0  title: "Hi"  text: "Hello"`). Works out of the box if inlay hints are enabled in Zed.
@@ -23,7 +23,7 @@
 - **Folding ranges** — LSP-computed folds for functions, `#Region` blocks, `If`/`While`/`For`/`Switch`/`Select`/`With` bodies, and multi-line block comments — including `#region` blocks that Zed's built-in folding can't fold. Opt-in; see [Folding](#folding).
 - **Code actions** — quick-fixes on diagnostic squiggles: add a missing `#include <Lib.au3>` for UDF library functions, and fix function-name casing to the canonical form.
 - **Code formatting** — reformat the current file via AutoIt3Wrapper's `/Tidy` mode (fixes indentation, normalises keyword/function casing). Windows-only; requires SciTE4AutoIt3. Trigger with the editor's **Format Document** command.
-- **Document symbols / outline** — functions, `Global`/`Const`/`Enum` declarations, `#Region` blocks.
+- **Document symbols / outline** — functions (with their parameters nested underneath), `Global`/`Const`/`Enum` declarations, and `#Region` blocks containing their contents. Collapsible outline is opt-in; see [Outline](#outline).
 - **Brackets, indentation, outline navigation** — the usual editor affordances.
 - **19 bundled snippets** for `Func`, `If`/`ElseIf`/`Else`, `For`, `While`, `Switch`, `Region`, `MsgBox`, `ConsoleWrite`, hot-keys, etc.
 - **7 task definitions** for run / Au3Check / Aut2Exe compile / Aut2Exe with GUI options / Au3Info / Koda Form Designer / kill running script. Zero-config for standard installer-based AutoIt installations (registry discovery).
@@ -42,7 +42,7 @@
 | Document symbols / outline | ✅ | ✅ | ✅ |
 | Document highlight | ✅ | ✅ | ✅ |
 | Folding ranges | ✅ | ✅ | ✅ |
-| Call hierarchy † | ✅ | ✅ | ✅ |
+| Call hierarchy | ✅ | ✅ | ✅ |
 | Semantic tokens | ✅ | ✅ | ✅ |
 | Document color | ✅ | ✅ | ✅ |
 | Code actions | ✅ | ✅ | ✅ |
@@ -50,8 +50,6 @@
 | Live diagnostics (Au3Check) ‡ | ✅ | ❌ | ❌ |
 | Code formatting (Tidy) ‡ | ✅ | ❌ | ❌ |
 | Task runners ‡ | ✅ | ❌ | ❌ |
-
-† **Call hierarchy** is computed by the language server on all platforms, but Zed does not yet expose a call-hierarchy UI ([zed-industries/zed#14203](https://github.com/zed-industries/zed/issues/14203)). It will become invokable in-editor once Zed ships one — no extension change needed.
 
 ‡ The Windows-only rows invoke AutoIt's official `.exe` binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt ships for Windows only. On macOS/Linux these features are silently disabled; everything else works.
 
@@ -145,6 +143,20 @@ The language server provides folding ranges for functions, `#Region` blocks, `If
 
 With `document_folding_ranges` set to `"on"`, the fold arrows in the gutter come from the LSP, and `#region … #endregion` blocks fold like everything else.
 
+### Outline
+
+By default Zed builds the outline panel, outline picker, and breadcrumbs from tree-sitter, which lists functions and regions only. To use the language server's richer symbol tree instead — top-level variables and constants, function parameters nested under their function, and region contents nested under the region, all collapsible — opt in per language:
+
+```json
+{
+  "languages": {
+    "AutoIt": {
+      "document_symbols": "on"
+    }
+  }
+}
+```
+
 ### Semantic highlighting
 
 The language server emits semantic tokens that classify identifiers more precisely than syntax alone can — user-defined functions vs built-ins, parameters vs local vs global variables, index-recognised constants, and macros. The most visible effect is that your own functions render differently from built-in/library functions (e.g. `MyHelper` vs `_ArrayAdd`), which most themes color out of the box.
@@ -170,10 +182,8 @@ All tasks scope to AutoIt files only and show up in the Command Palette under **
 ### Permanent constraints
 
 - **Diagnostics, code formatting, and tasks are Windows-only.** They invoke AutoIt's official binaries (`Au3Check.exe`, `AutoIt3.exe`, `Aut2Exe.exe`), which AutoIt itself only ships for Windows. Everything else — syntax, outline, hover, go-to-definition, find-references, completion, code actions, semantic tokens, folding, document color, and snippets — works on Linux and macOS too.
-- **Call hierarchy has no in-editor UI yet** (Zed limitation — [zed-industries/zed#14203](https://github.com/zed-industries/zed/issues/14203)). The language server fully implements it; it becomes invokable once Zed ships a call-hierarchy UI.
 - **No color picker** (Zed limitation — [zed-industries/zed#52208](https://github.com/zed-industries/zed/issues/52208)). Color swatches render next to `0x…` literals, but clicking one doesn't open an editable picker yet. The server already answers `colorPresentation`, so the picker will work as soon as Zed ships one.
-- **Outline panel is flat** (Zed limitation — the LSP emits a proper hierarchy with parameters as children of functions and contents nested under regions, but Zed's outline panel renders flat with indentation instead of expand/collapse — tracked at [zed-industries/zed#23095](https://github.com/zed-industries/zed/issues/23095)).
-- **Snippets fire inside strings/comments** (Zed limitation — the extension's `overrides.scm` correctly identifies string/comment scopes and suppresses word/LSP completions there, but Zed's snippet provider doesn't currently honor the per-scope override — tracked at [zed-industries/zed#21578](https://github.com/zed-industries/zed/pull/21578)). The existing override blocks will start working automatically once that is fixed upstream.
+- **Snippets fire inside strings/comments** (Zed limitation — the extension's `overrides.scm` correctly identifies string/comment scopes and suppresses word/LSP completions there, but Zed's snippet completions ignore the scope under the cursor). The existing override blocks will start working automatically once Zed honors them for snippets.
 
 ## Troubleshooting
 
